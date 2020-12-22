@@ -76,6 +76,7 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (719455, uint256("ff67a6645a36a82a3885c989951680917c9e2de90f59665c8130701ccdcbb9f9"))
     (719456, uint256("d56f2e69ab04a02ad766d45c98916c85aac3fa4d2b03a8f4a73a67d81c5260b3"))
     (719457, uint256("2cda22a56c901fc8bb9ef7ae9690756a8107845ab3086c4ab4a97f1c0688a41d"))
+    (719538, uint256("038a354dcdf04090defc8457f70569f908bbc645a50644d61b33dac014e6cf84")) // Block many people are getting stuck on
     ;
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
