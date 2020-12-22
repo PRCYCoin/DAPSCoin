@@ -73,9 +73,9 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (209577, uint256("5231320be89de8a0fdebbd45d4d0c58abb1ea7a134ba52a11a2036f32d90e66c"))
     (458733, uint256("51d7f917147f3bec3f2e6767fd70c14730a0b0773a7b967e827336e936cf50e2"))
     (458734, uint256("35ff8e3884036187ed56e7d4a4adda3e0f75eac5655afd4cef8605954b28362f"))
-    (719455, uint256("ff67a6645a36a82a3885c989951680917c9e2de90f59665c8130701ccdcbb9f9"))
-    (719456, uint256("d56f2e69ab04a02ad766d45c98916c85aac3fa4d2b03a8f4a73a67d81c5260b3"))
-    (719457, uint256("2cda22a56c901fc8bb9ef7ae9690756a8107845ab3086c4ab4a97f1c0688a41d"))
+    (719455, uint256("ff67a6645a36a82a3885c989951680917c9e2de90f59665c8130701ccdcbb9f9")) // Blocks surrounding chain split
+    (719456, uint256("d56f2e69ab04a02ad766d45c98916c85aac3fa4d2b03a8f4a73a67d81c5260b3")) // Blocks surrounding chain split
+    (719457, uint256("2cda22a56c901fc8bb9ef7ae9690756a8107845ab3086c4ab4a97f1c0688a41d")) // Blocks surrounding chain split
     (719538, uint256("038a354dcdf04090defc8457f70569f908bbc645a50644d61b33dac014e6cf84")) // Block many people are getting stuck on
     ;
 static const Checkpoints::CCheckpointData data = {
