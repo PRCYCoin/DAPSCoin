@@ -77,6 +77,7 @@ static Checkpoints::MapCheckpoints mapCheckpoints =
     (719456, uint256("d56f2e69ab04a02ad766d45c98916c85aac3fa4d2b03a8f4a73a67d81c5260b3")) // Blocks surrounding chain split
     (719457, uint256("2cda22a56c901fc8bb9ef7ae9690756a8107845ab3086c4ab4a97f1c0688a41d")) // Blocks surrounding chain split
     (719538, uint256("038a354dcdf04090defc8457f70569f908bbc645a50644d61b33dac014e6cf84")) // Block many people are getting stuck on
+    (803585, uint256("34ffd432abf79afeac0b0c005538de9b4c3e9f31ea4a63b627ce3cf5fa56a133")) // First PoA block after Hard Fork
     ;
 static const Checkpoints::CCheckpointData data = {
     &mapCheckpoints,
