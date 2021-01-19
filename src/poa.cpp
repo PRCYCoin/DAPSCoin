@@ -216,7 +216,7 @@ bool CheckPoAContainRecentHash(const CBlock& block)
     } else {
         if (pindex->nHeight >= Params().START_POA_BLOCK()) {
             // Bypass bad block
-            if (pindex->nHeight == 719390) {
+            if (pindex->nHeight == 719390 || pindex->nHeight == 719456) {
                 return true;
             }
             CBlock prevPoablock;
