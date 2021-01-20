@@ -62,3 +62,6 @@ More information at [officialdapscoin.com](https://officialdapscoin.com) Visit o
 <tr><td>Max Coin Supply</td><td>70,000,000,000 DAPS</td></tr>
 <tr><td>Premine</td><td>60 000 000 000 DAPS</td></tr>
 </table>
+
+## BootStrap
+Our latest BootStrap is always available at https://bootstrap.dapscoin.com/
