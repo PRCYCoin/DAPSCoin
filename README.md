@@ -43,8 +43,6 @@ LinkedIn - (https://www.linkedin.com/company/daps-coin/)
 
 Reddit - (https://www.reddit.com/r/DAPSCoin/)
 
-Forum - (https://forum.officialdapscoin.com/)
-
 Telegram - (https://t.me/dapscoin) 
 
 Discord - (https://discord.gg/hxfmWpR)
