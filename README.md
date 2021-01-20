@@ -1,3 +1,5 @@
+![Github Actions CI for DAPS](https://github.com/DAPSCoin/DAPSCoin/workflows/Github%20Actions%20CI%20for%20DAPS/badge.svg?branch=master)
+
 Welcome to DAPS
 =====================================
 
@@ -43,8 +45,6 @@ LinkedIn - (https://www.linkedin.com/company/daps-coin/)
 
 Reddit - (https://www.reddit.com/r/DAPSCoin/)
 
-Forum - (https://forum.officialdapscoin.com/)
-
 Telegram - (https://t.me/dapscoin) 
 
 Discord - (https://discord.gg/hxfmWpR)
@@ -62,3 +62,6 @@ More information at [officialdapscoin.com](https://officialdapscoin.com) Visit o
 <tr><td>Max Coin Supply</td><td>70,000,000,000 DAPS</td></tr>
 <tr><td>Premine</td><td>60 000 000 000 DAPS</td></tr>
 </table>
+
+## BootStrap
+Our latest BootStrap is always available at https://bootstrap.dapscoin.com/
