@@ -1,5 +1,3 @@
-![Github Actions CI for DAPS](https://github.com/DAPSCoin/DAPSCoin/workflows/Github%20Actions%20CI%20for%20DAPS/badge.svg?branch=master)
-
 Welcome to DAPS
 =====================================
 
