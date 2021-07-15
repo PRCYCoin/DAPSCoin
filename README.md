@@ -13,16 +13,14 @@ DAPS is a cryptocurrency designed for corporate entities, traders, and individua
 
 DAPS is a privacy coin that aims to be the most private and secure privacy coin on the market in a hybrid chain of PoW, PoSv3 and PoA. We aim to set our protocol to become the new standard of privacy coins.
 
-What makes DAPS special is that DAPS is the first to solve the "trust problem" for fully private chains with our PoA (Proof of Audit) algorithm which audits the chain for any abnormalities without compromising the chain's anonymity features.
-
 DAPS is the world's first coin to implement Bulletproofs and RingCT & Ring Signatures in a staking chain. With DAPS it is possible to stake, run masternodes and mine PoA blocks. In 2019 DAPS completed two successful testnets, sponsored Consensus 2019 NYC and Futurist Conference in Canada, achieved and kept top 200 coin status, passed security audit by Red4Sec, launched mainnet and achieved over 3000 hosted masternodes in the first month, staying in the top 10.
 
 ## About this Project
 
 DAPS is a non-ICO community driven project. The project has funded itself to deliver ground-breaking technology in the privacy coin industry.
 
-DAPS Team
-The team consists of a total of 20 members located worldwide.
+DAPS DAO
+The community runs the project via DAPS DAO on DaoHaus. https://app.daohaus.club/dao/0x1/0xfc8eba8a52b21562f8b6843f545f4e744f0f0d41
 
 ## How we Compare to Other Privacy Projects
 
@@ -43,16 +41,12 @@ Twitter - (https://twitter.com/DAPScoin)
 
 LinkedIn - (https://www.linkedin.com/company/daps-coin/)
 
-Reddit - (https://www.reddit.com/r/DAPSCoin/)
-
 Telegram - (https://t.me/dapscoin) 
 
 Discord - (https://discord.gg/hxfmWpR)
 
-Bitcointalk - (https://bitcointalk.org/index.php?topic=5146718.0)
 
-
-More information at [officialdapscoin.com](https://officialdapscoin.com) Visit our ANN thread at [BitcoinTalk](https://bitcointalk.org/index.php?topic=5146718)
+More information at [officialdapscoin.com](https://officialdapscoin.com)
 
 ### Coin Specs
 <table>
