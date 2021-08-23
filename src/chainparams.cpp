@@ -143,6 +143,7 @@ public:
         nMaxNumPoSBlocks = 120;
         nSoftForkBlock = 125000; // Soft fork block for difficulty change
         nHardForkBlock = 670000; // Hard fork block for PoA updates
+        nTreasuryForkBlock = 1150000; // Treasury address update
 
         /**
          * Build the genesis block. Note that the output of the genesis coinbase cannot

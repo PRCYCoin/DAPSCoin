@@ -5780,6 +5780,15 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             return true;
         }
 
+        // Disconnect from old peers once we are at the upgrade block
+        if (pfrom->nVersion < 70914 && (chainActive.Height() + 1 >= Params().TreasuryFork() || Params().NetworkID() != CBaseChainParams::MAIN)) {
+            LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);
+            pfrom->PushMessage("reject", strCommand, REJECT_OBSOLETE,
+                               strprintf("Version must be %d or greater", 70914));
+            pfrom->fDisconnect = true;
+            return false;
+        }
+
         pfrom->addrLocal = addrMe;
         if (pfrom->fInbound && addrMe.IsRoutable()) {
             SeenLocal(addrMe);
