@@ -4039,7 +4039,12 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             CAmount blockValue = GetBlockValue(pindexPrev);
             if (blockValue > PoSBlockReward()) {
                 CAmount teamReward = blockValue - PoSBlockReward();
-                const std::string foundational = FOUNDATION_WALLET;
+                std::string foundational = "";
+                if(chainActive.Height() + 1 >= Params().TreasuryFork()){
+                    foundational = FOUNDATION_WALLET;
+                }else{
+                    foundational = FOUNDATION_WALLET_OLD;
+                }
                 CPubKey foundationalGenPub, pubView, pubSpend;
                 bool hasPaymentID;
                 uint64_t paymentID;

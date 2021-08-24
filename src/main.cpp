@@ -670,10 +670,16 @@ bool ReVerifyPoSBlock(CBlockIndex* pindex)
                 LogPrintf("ReVerifyPoSBlock() : Incorrect amount PoS rewards for foundation, reward = %d while the correct reward = %d", foundationOut.nValue, teamReward);
                 return false;
             }
-
-            if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET)) {
-                LogPrintf("ReVerifyPoSBlock() : Incorrect derived address PoS rewards for foundation");
-                return false;
+            if(thisBlockHeight >= Params().TreasuryFork()){
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET)) {
+                    LogPrintf("ReVerifyPoSBlock() : Incorrect derived address PoS rewards for foundation");
+                    return false;
+                }
+            }else{
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET_OLD)) {
+                    LogPrintf("ReVerifyPoSBlock() : Incorrect derived address PoS rewards for foundation");
+                    return false;
+                }
             }
         } else {
             //there is no team rewards in this block
@@ -3066,8 +3072,13 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
             if (foundationOut.nValue != teamReward)
                 return state.DoS(100, error("ConnectBlock() : Incorrect amount PoS rewards for foundation, reward = %d while the correct reward = %d", foundationOut.nValue, teamReward));
 
-            if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET))
-                return state.DoS(100, error("ConnectBlock() : Incorrect derived address PoS rewards for foundation"));
+            if (thisBlockHeight >= Params().TreasuryFork()) {
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET))
+                    return state.DoS(100, error("ConnectBlock() : Incorrect derived address PoS rewards for foundation"));
+            } else {
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET_OLD))
+                    return state.DoS(100, error("ConnectBlock() : Incorrect derived address PoS rewards for foundation"));
+            }
         } else {
             //there is no team rewards in this block
             const CTxOut& mnOut = coinstake.vout[numUTXO - 1];
