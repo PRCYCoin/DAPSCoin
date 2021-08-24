@@ -289,6 +289,7 @@ public:
         nBlockEnforceInvalidUTXO = 9902850; //Start enforcing the invalid UTXO's
         nSoftForkBlock = 0; // Soft fork block for difficulty change - testnet started with it
         nHardForkBlock = 92000; // Hard fork block for PoA updates
+        nTreasuryForkBlock = 0;
 
         //! Modify the testnet genesis block so the timestamp is valid for a later start.
         genesis.nTime = 1590109816;
@@ -390,6 +391,7 @@ public:
         genesis.nTime = 1569319143;
         genesis.nBits = 0x207fffff;
         genesis.nNonce = 12359;
+        nTreasuryForkBlock = 0;
 
         if(genesis.GetHash()!=uint256("2ed32054ce47f012ff186e6116b4906a8cd9d73ff5c689a8623bf36aed774536"))
         {
