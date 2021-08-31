@@ -106,6 +106,7 @@ public:
     int SoftFork() const { return nSoftForkBlock;}
     int HardFork() const { return nHardForkBlock;}
     int TreasuryFork() const { return nTreasuryForkBlock;}
+    int TreasuryForkBlockVersion() const { return nTreasuryForkBlockVersion;}
 
     //For PoA block time
     int POA_BLOCK_TIME() const { return nPoABlockTime; }
@@ -136,6 +137,7 @@ protected:
     int nSoftForkBlock;
     int nHardForkBlock;
     int nTreasuryForkBlock;
+    int nTreasuryForkBlockVersion;
     int nMasternodeCountDrift;
     int nMaturity;
     int nModifierUpdateBlock;

@@ -2174,7 +2174,13 @@ CAmount TeamRewards(const CBlockIndex* ptip)
         return (pForkTip->nHeight - Params().LAST_POW_BLOCK() - 1 + 1 /*+1 for the being created PoS block*/) * 50 * COIN;
     }
 
+    //Treasury amount paid per day
+    if(chainActive.Height() >= Params().TreasuryFork()) {
+        ret = 72000 * COIN;
+    }
+
     //loop back to find the PoA block right after which the daps team is paid
+    /*
     uint256 lastPoAHash = lastPoABlock->hashPrevPoABlock;
     CAmount ret = 0;
     int numPoABlocks = 1;
@@ -2184,10 +2190,11 @@ CAmount TeamRewards(const CBlockIndex* ptip)
         lastPoAHash = p->hashPrevPoABlock;
         numPoABlocks++;
     }
-
-    if (!lastPoAHash.IsNull() && numPoABlocks != 0 && numPoABlocks % 24 == 0) {
-        ret = (pForkTip->nHeight - (mapBlockIndex[lastPoAHash]->nHeight + 1) - numPoABlocks + 1 /*+1 for the being created PoS block*/) * 50 * COIN;
-    }
+    */
+    //if (!lastPoAHash.IsNull() && numPoABlocks != 0 && numPoABlocks % 24 == 0) {
+    //    ret = (pForkTip->nHeight - (mapBlockIndex[lastPoAHash]->nHeight + 1) - numPoABlocks + 1 /*+1 for the being created PoS block*/) * 50 * COIN;
+    //}
+    
     return ret;
 }
 
@@ -2208,7 +2215,9 @@ int64_t GetBlockValue(const CBlockIndex* ptip)
         nSubsidy = 120000000 * COIN;
     } else {
         nSubsidy = PoSBlockReward();
-        nSubsidy += TeamRewards(pForkTip);
+        if(chainActive.Height() % 1440 == 0) {
+            nSubsidy += TeamRewards(pForkTip);
+        }
     }
 
     if (pForkTip->nMoneySupply + nSubsidy >= Params().TOTAL_SUPPLY) {
@@ -4284,6 +4293,15 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
             REJECT_INVALID, "time-too-old");
     }
 
+    // // Enforce block version 5 after mandatory upgrade block nTreasuryForkBlock
+    if (nHeight >= Params().TreasuryFork()) {
+		if (block.nVersion < Params().TreasuryForkBlockVersion())
+			return state.DoS(50, error("ContextualCheckBlockHeader() : block version must be at least %d after treasury fork block", Params().TreasuryForkBlockVersion()), REJECT_INVALID, "block-version");
+	} else {
+		if (block.nVersion >= Params().TreasuryForkBlockVersion())
+			return state.DoS(50, error("ContextualCheckBlockHeader() : block version must be below %d before treasury fork block", Params().TreasuryForkBlockVersion()), REJECT_INVALID, "block-version");
+	}
+
     // Check that the block chain matches the known block chain up to a checkpoint
     if (!Checkpoints::CheckBlock(nHeight, hash))
         return state.DoS(100, error("%s : rejected by checkpoint lock-in at %d", __func__, nHeight),
@@ -5797,6 +5815,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);
             pfrom->PushMessage("reject", strCommand, REJECT_OBSOLETE,
                                strprintf("Version must be %d or greater", 70914));
+            state->fShouldBan = true;
             pfrom->fDisconnect = true;
             return false;
         }
