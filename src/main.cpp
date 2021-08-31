@@ -2175,6 +2175,8 @@ CAmount TeamRewards(const CBlockIndex* ptip)
     }
 
     //Treasury amount paid per day
+    CAmount ret = 0;
+    
     if(pForkTip->nHeight >= Params().TreasuryFork()) {
         ret = 72000 * COIN;
     }
