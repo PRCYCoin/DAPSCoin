@@ -2175,7 +2175,7 @@ CAmount TeamRewards(const CBlockIndex* ptip)
     }
 
     //Treasury amount paid per day
-    if(chainActive.Height() >= Params().TreasuryFork()) {
+    if(pForkTip->nHeight >= Params().TreasuryFork()) {
         ret = 72000 * COIN;
     }
 
@@ -2215,7 +2215,7 @@ int64_t GetBlockValue(const CBlockIndex* ptip)
         nSubsidy = 120000000 * COIN;
     } else {
         nSubsidy = PoSBlockReward();
-        if(chainActive.Height() % 1440 == 0) {
+        if(pForkTip->nHeight % 1440 == 0) {
             nSubsidy += TeamRewards(pForkTip);
         }
     }
