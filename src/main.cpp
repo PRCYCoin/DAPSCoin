@@ -670,10 +670,16 @@ bool ReVerifyPoSBlock(CBlockIndex* pindex)
                 LogPrintf("ReVerifyPoSBlock() : Incorrect amount PoS rewards for foundation, reward = %d while the correct reward = %d", foundationOut.nValue, teamReward);
                 return false;
             }
-
-            if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET)) {
-                LogPrintf("ReVerifyPoSBlock() : Incorrect derived address PoS rewards for foundation");
-                return false;
+            if(thisBlockHeight >= Params().TreasuryFork()){
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET)) {
+                    LogPrintf("ReVerifyPoSBlock() : Incorrect derived address PoS rewards for foundation");
+                    return false;
+                }
+            }else{
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET_OLD)) {
+                    LogPrintf("ReVerifyPoSBlock() : Incorrect derived address PoS rewards for foundation");
+                    return false;
+                }
             }
         } else {
             //there is no team rewards in this block
@@ -2168,7 +2174,15 @@ CAmount TeamRewards(const CBlockIndex* ptip)
         return (pForkTip->nHeight - Params().LAST_POW_BLOCK() - 1 + 1 /*+1 for the being created PoS block*/) * 50 * COIN;
     }
 
+    //Treasury amount paid per day
+    CAmount ret = 0;
+    
+    if(pForkTip->nHeight >= Params().TreasuryFork()) {
+        ret = 72000 * COIN;
+    }
+
     //loop back to find the PoA block right after which the daps team is paid
+    /*
     uint256 lastPoAHash = lastPoABlock->hashPrevPoABlock;
     CAmount ret = 0;
     int numPoABlocks = 1;
@@ -2178,10 +2192,11 @@ CAmount TeamRewards(const CBlockIndex* ptip)
         lastPoAHash = p->hashPrevPoABlock;
         numPoABlocks++;
     }
-
-    if (!lastPoAHash.IsNull() && numPoABlocks != 0 && numPoABlocks % 24 == 0) {
-        ret = (pForkTip->nHeight - (mapBlockIndex[lastPoAHash]->nHeight + 1) - numPoABlocks + 1 /*+1 for the being created PoS block*/) * 50 * COIN;
-    }
+    */
+    //if (!lastPoAHash.IsNull() && numPoABlocks != 0 && numPoABlocks % 24 == 0) {
+    //    ret = (pForkTip->nHeight - (mapBlockIndex[lastPoAHash]->nHeight + 1) - numPoABlocks + 1 /*+1 for the being created PoS block*/) * 50 * COIN;
+    //}
+    
     return ret;
 }
 
@@ -2202,7 +2217,9 @@ int64_t GetBlockValue(const CBlockIndex* ptip)
         nSubsidy = 120000000 * COIN;
     } else {
         nSubsidy = PoSBlockReward();
-        nSubsidy += TeamRewards(pForkTip);
+        if(pForkTip->nHeight % 1440 == 0) {
+            nSubsidy += TeamRewards(pForkTip);
+        }
     }
 
     if (pForkTip->nMoneySupply + nSubsidy >= Params().TOTAL_SUPPLY) {
@@ -3066,8 +3083,13 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
             if (foundationOut.nValue != teamReward)
                 return state.DoS(100, error("ConnectBlock() : Incorrect amount PoS rewards for foundation, reward = %d while the correct reward = %d", foundationOut.nValue, teamReward));
 
-            if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET))
-                return state.DoS(100, error("ConnectBlock() : Incorrect derived address PoS rewards for foundation"));
+            if (thisBlockHeight >= Params().TreasuryFork()) {
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET))
+                    return state.DoS(100, error("ConnectBlock() : Incorrect derived address PoS rewards for foundation"));
+            } else {
+                if (!VerifyDerivedAddress(foundationOut, FOUNDATION_WALLET_OLD))
+                    return state.DoS(100, error("ConnectBlock() : Incorrect derived address PoS rewards for foundation"));
+            }
         } else {
             //there is no team rewards in this block
             const CTxOut& mnOut = coinstake.vout[numUTXO - 1];
@@ -4272,6 +4294,15 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
         return state.Invalid(error("%s : block's timestamp is too early", __func__),
             REJECT_INVALID, "time-too-old");
     }
+
+    // // Enforce block version 5 after mandatory upgrade block nTreasuryForkBlock
+    if (nHeight >= Params().TreasuryFork()) {
+		if (block.nVersion < Params().TreasuryForkBlockVersion())
+			return state.DoS(50, error("ContextualCheckBlockHeader() : block version must be at least %d after treasury fork block", Params().TreasuryForkBlockVersion()), REJECT_INVALID, "block-version");
+	} else {
+		if (block.nVersion >= Params().TreasuryForkBlockVersion())
+			return state.DoS(50, error("ContextualCheckBlockHeader() : block version must be below %d before treasury fork block", Params().TreasuryForkBlockVersion()), REJECT_INVALID, "block-version");
+	}
 
     // Check that the block chain matches the known block chain up to a checkpoint
     if (!Checkpoints::CheckBlock(nHeight, hash))
@@ -5776,8 +5807,19 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         // Disconnect if we connected to ourself
         if (nNonce == nLocalHostNonce && nNonce > 1) {
             LogPrintf("connected to self at %s, disconnecting\n", pfrom->addr.ToString());
+            state->fShouldBan = true;
             pfrom->fDisconnect = true;
             return true;
+        }
+
+        // Disconnect from old peers once we are at the upgrade block
+        if (pfrom->nVersion < 70914 && (chainActive.Height() + 1 >= Params().TreasuryFork() || Params().NetworkID() != CBaseChainParams::MAIN)) {
+            LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);
+            pfrom->PushMessage("reject", strCommand, REJECT_OBSOLETE,
+                               strprintf("Version must be %d or greater", 70914));
+            state->fShouldBan = true;
+            pfrom->fDisconnect = true;
+            return false;
         }
 
         pfrom->addrLocal = addrMe;

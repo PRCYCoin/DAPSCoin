@@ -123,7 +123,9 @@ static const unsigned char REJECT_DUST = 0x41;
 static const unsigned char REJECT_INSUFFICIENTFEE = 0x42;
 static const unsigned char REJECT_CHECKPOINT = 0x43;
 
-static const std::string FOUNDATION_WALLET = "41jsGvYo3GMWCvFVZekSnrRV8ptJfMGhuhRjB9tYEv5NSA47VqyLp6gKSCpS3wHTBhCGu9DJ5k1HMWXeHVnL9nUs15CjyeCQDiT";
+//Treasury address
+static const std::string FOUNDATION_WALLET_OLD = "41jsGvYo3GMWCvFVZekSnrRV8ptJfMGhuhRjB9tYEv5NSA47VqyLp6gKSCpS3wHTBhCGu9DJ5k1HMWXeHVnL9nUs15CjyeCQDiT"; // deprecated at block nTreasuryForkBlock
+static const std::string FOUNDATION_WALLET = "41knPdyN7tqjEEfk7WUaU7Pdfkbj87ar9Z85jyhv9eEfQqH6AuBG5nHdFUjXjmedrUZsrcUPbNj9NBCbszjcEx5s15d9ajB9ikt";
 
 struct BlockHasher {
     size_t operator()(const uint256& hash) const { return hash.GetLow64(); }

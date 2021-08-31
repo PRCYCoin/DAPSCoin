@@ -169,7 +169,10 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, const CPubKey& txP
     if (Params().MineBlocksOnDemand())
         pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
 
-    pblock->nVersion = 3;
+    if(chainActive.Height() >= Params().TreasuryFork() && Params().NetworkID() == CBaseChainParams::MAIN)
+        pblock->nVersion = Params().TreasuryForkBlockVersion();
+    else
+        pblock->nVersion = 3;
 
     // Create coinbase tx
     CMutableTransaction txNew;
