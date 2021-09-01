@@ -4299,9 +4299,6 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     if (nHeight >= Params().TreasuryFork()) {
 		if (block.nVersion < Params().TreasuryForkBlockVersion())
 			return state.DoS(50, error("ContextualCheckBlockHeader() : block version must be at least %d after treasury fork block", Params().TreasuryForkBlockVersion()), REJECT_INVALID, "block-version");
-	} else {
-		if (block.nVersion >= Params().TreasuryForkBlockVersion())
-			return state.DoS(50, error("ContextualCheckBlockHeader() : block version must be below %d before treasury fork block", Params().TreasuryForkBlockVersion()), REJECT_INVALID, "block-version");
 	}
 
     // Check that the block chain matches the known block chain up to a checkpoint
@@ -5807,7 +5804,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         // Disconnect if we connected to ourself
         if (nNonce == nLocalHostNonce && nNonce > 1) {
             LogPrintf("connected to self at %s, disconnecting\n", pfrom->addr.ToString());
-            state->fShouldBan = true;
             pfrom->fDisconnect = true;
             return true;
         }
