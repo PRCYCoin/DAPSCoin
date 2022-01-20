@@ -263,7 +263,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, const CPubKey& txP
             // Check key images not duplicated with what in db
             for (const CTxIn& txin : tx.vin) {
                 const CKeyImage& keyImage = txin.keyImage;
-                if (IsKeyImageSpend1(keyImage.GetHex(), uint256())) {
+                if (IsSpentKeyImage(keyImage.GetHex(), uint256())) {
                     fKeyImageCheck = false;
                     break;
                 }
@@ -654,7 +654,7 @@ bool fGeneratePrcycoins = false;
 
 // ***TODO*** that part changed in bitcoin, we are using a mix with old one here for now
 
-void BitcoinMiner(CWallet* pwallet, bool fProofOfStake, MineType mineType)
+void BitcoinMiner(CWallet* pwallet, bool fProofOfStake)
 {
     nDefaultMinerSleep = GetArg("-minersleep", 45000);
     LogPrintf("PRCYcoinMiner started with %sms sleep time\n", nDefaultMinerSleep);

@@ -15,7 +15,6 @@
 #include "addrman.h"
 #include "chainparams.h"
 #include "clientversion.h"
-#include "miner.h"
 #include "obfuscation.h"
 #include "primitives/transaction.h"
 #include "netbase.h"
@@ -32,7 +31,6 @@
 
 #ifdef USE_UPNP
 #include <miniupnpc/miniupnpc.h>
-#include <miniupnpc/miniwget.h>
 #include <miniupnpc/upnpcommands.h>
 #include <miniupnpc/upnperrors.h>
 #endif
@@ -80,7 +78,6 @@ bool fListen = true;
 ServiceFlags nLocalServices = NODE_NETWORK;
 RecursiveMutex cs_mapLocalHost;
 std::map<CNetAddr, LocalServiceInfo> mapLocalHost;
-//static bool vfReachable[NET_MAX] = {};
 static bool vfLimited[NET_MAX] = {};
 static CNode *pnodeLocalHost = NULL;
 uint64_t nLocalHostNonce = 0;
@@ -187,46 +184,6 @@ CAddress GetLocalAddress(const CNetAddr *paddrPeer) {
     }
     ret.nTime = GetAdjustedTime();
     return ret;
-}
-
-bool RecvLine(SOCKET hSocket, std::string& strLine) {
-    strLine = "";
-    while (true) {
-        char c;
-        int nBytes = recv(hSocket, &c, 1, 0);
-        if (nBytes > 0) {
-            if (c == '\n')
-                continue;
-            if (c == '\r')
-                return true;
-            strLine += c;
-            if (strLine.size() >= 9000)
-                return true;
-        } else if (nBytes <= 0) {
-            boost::this_thread::interruption_point();
-            if (nBytes < 0) {
-                int nErr = WSAGetLastError();
-                if (nErr == WSAEMSGSIZE)
-                    continue;
-                if (nErr == WSAEWOULDBLOCK || nErr == WSAEINTR || nErr == WSAEINPROGRESS) {
-                    MilliSleep(10);
-                    continue;
-                }
-            }
-            if (!strLine.empty())
-                return true;
-            if (nBytes == 0) {
-                // socket closed
-                LogPrint(BCLog::NET, "socket closed\n");
-                return false;
-            } else {
-                // socket error
-                int nErr = WSAGetLastError();
-                LogPrint(BCLog::NET, "recv failed: %s\n", NetworkErrorString(nErr));
-                return false;
-            }
-        }
-    }
 }
 
 int GetnScore(const CService &addr) {
@@ -343,7 +300,7 @@ bool IsReachable(enum Network net) {
 /** check whether a given address is in a network we can probably connect to */
 bool IsReachable(const CNetAddr &addr) {
     enum Network net = addr.GetNetwork();
-    return !vfLimited[net];
+    return IsReachable(net);
 }
 
 void AddressCurrentlyConnected(const CService &addr) {
@@ -527,7 +484,6 @@ bool CNode::IsBanned(CNetAddr ip) {
         }
     }
     return fResult;
-    return false;
 }
 
 bool CNode::IsBanned(CSubNet subnet) {
@@ -1316,7 +1272,7 @@ void static ProcessOneShot() {
         strDest = vOneShots.front();
         vOneShots.pop_front();
     }
-    CAddress addr(CService(), NODE_NONE);
+    CAddress addr;
     CSemaphoreGrant grant(*semOutbound, true);
     if (grant) {
         if (!OpenNetworkConnection(addr, false, &grant, strDest.c_str(), true))
@@ -1330,7 +1286,7 @@ void ThreadOpenConnections() {
         for (int64_t nLoop = 0;; nLoop++) {
             ProcessOneShot();
             for (std::string strAddr : mapMultiArgs["-connect"]) {
-                CAddress addr;
+                CAddress addr(CService(), NODE_NONE);
                 OpenNetworkConnection(addr, false, NULL, strAddr.c_str());
                 for (int i = 0; i < 10 && i < nLoop; i++) {
                     MilliSleep(500);
@@ -1573,12 +1529,9 @@ void ThreadMessageHandler() {
             boost::this_thread::interruption_point();
             // Send messages
             {
-                TRY_LOCK(cs_main, lockMain);
-                    if (lockMain) {
-                    TRY_LOCK(pnode->cs_vSend, lockSend);
-                    if (lockSend)
-                        g_signals.SendMessages(pnode, pnode == pnodeTrickle || pnode->fWhitelisted);
-                }
+                TRY_LOCK(pnode->cs_vSend, lockSend);
+                if (lockSend)
+                    g_signals.SendMessages(pnode, pnode == pnodeTrickle || pnode->fWhitelisted);
             }
             boost::this_thread::interruption_point();
         }
