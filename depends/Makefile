@@ -40,6 +40,8 @@ NO_UPNP ?=
 LTO ?=
 FALLBACK_DOWNLOAD_PATH ?= https://bootstrap.prcycoin.com/depends-sources
 
+C_STANDARD ?= c11
+
 BUILD = $(shell ./config.guess)
 HOST ?= $(BUILD)
 PATCHES_PATH = $(BASEDIR)/patches
