@@ -11,6 +11,7 @@ android_RANLIB=$(ANDROID_TOOLCHAIN_BIN)/$(HOST)-ranlib
 endif
 
 android_CFLAGS=-std=$(C_STANDARD)
+android_CXXFLAGS=-std=$(CXX_STANDARD)
 
 ifneq ($(LTO),)
 android_CFLAGS += -flto

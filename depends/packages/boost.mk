@@ -31,7 +31,6 @@ else
 $(package)_toolset_$(host_os)=gcc
 endif
 $(package)_config_libraries=chrono,filesystem,program_options,system,thread,test
-$(package)_cxxflags+=-std=c++17
 $(package)_cxxflags_linux=-fPIC
 $(package)_cxxflags_freebsd=-fPIC
 $(package)_cxxflags_openbsd=-fPIC
