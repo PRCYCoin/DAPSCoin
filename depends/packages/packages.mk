@@ -1,6 +1,6 @@
-packages:=boost openssl libevent libcurl
+packages:=boost openssl libevent libcurl libarchive zlib
 
-qt_packages = qrencode zlib
+qt_packages = qrencode
 
 qt_linux_packages:=qt expat libxcb xcb_proto libXau xproto freetype fontconfig libxkbcommon
 
