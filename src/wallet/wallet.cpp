@@ -1791,22 +1791,30 @@ void CWallet::RemoveFromSpends(const uint256& wtxid)
  */
 void CWallet::ReorderWalletTransactions(std::map<std::pair<int,int>, CWalletTx*> &mapSorted, int64_t &maxOrderPos)
 {
-    LOCK2(cs_main, cs_wallet);
+    AssertLockHeld(cs_main);
+    AssertLockHeld(cs_wallet);
 
     int maxSortNumber = chainActive.Tip()->nHeight + 1;
 
     for (std::map<uint256, CWalletTx>::iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
     {
         CWalletTx* pwtx = &(it->second);
-        int confirms = pwtx->GetDepthInMainChain();
         maxOrderPos = std::max(maxOrderPos, pwtx->nOrderPos);
 
-        if (confirms > 0) {
-            int wtxHeight = mapBlockIndex[pwtx->hashBlock]->nHeight;
-            auto key = std::make_pair(wtxHeight, pwtx->nIndex);
-            mapSorted.insert(make_pair(key, pwtx));
-        }
-        else {
+        if (mapBlockIndex.count(pwtx->hashBlock) > 0) {
+            auto blockIndex = mapBlockIndex[pwtx->hashBlock];
+            if (blockIndex) {
+                int wtxHeight = blockIndex->nHeight;
+                auto key = std::make_pair(wtxHeight, pwtx->nIndex);
+                mapSorted.insert(make_pair(key, pwtx));
+            } else {
+                // handle null blockIndex
+                LogPrint(BCLog::DELETETX,"Reorder Tx - mapBlockIndex returned null for %s\n", pwtx->hashBlock.ToString());
+                auto key = std::make_pair(maxSortNumber, 0);
+                mapSorted.insert(std::make_pair(key, pwtx));
+                maxSortNumber++;
+            }
+        } else {
             auto key = std::make_pair(maxSortNumber, 0);
             mapSorted.insert(std::make_pair(key, pwtx));
             maxSortNumber++;
@@ -1819,7 +1827,8 @@ void CWallet::ReorderWalletTransactions(std::map<std::pair<int,int>, CWalletTx*>
  */
 void CWallet::UpdateWalletTransactionOrder(std::map<std::pair<int,int>, CWalletTx*> &mapSorted, bool resetOrder)
 {
-    LOCK2(cs_main, cs_wallet);
+    AssertLockHeld(cs_main);
+    AssertLockHeld(cs_wallet);
 
     int64_t previousPosition = 0;
     std::map<const uint256, CWalletTx*> mapUpdatedTxs;
@@ -1854,20 +1863,24 @@ void CWallet::UpdateWalletTransactionOrder(std::map<std::pair<int,int>, CWalletT
     //Update Next Wallet Tx Positon
     nOrderPosNext = previousPosition++;
     CWalletDB(strWalletFile).WriteOrderPosNext(nOrderPosNext);
-    LogPrint(BCLog::DELETETX,"Reorder Tx - Total Transactions Reordered %i, Next Position %i\n", mapUpdatedTxs.size(), nOrderPosNext);
-
+    LogPrint(BCLog::DELETETX,"Reorder Tx - Total Transactions Reordered %i, Next Position %i\n ", mapUpdatedTxs.size(), nOrderPosNext);
 }
 
 /**
  * Delete transactions from the Wallet
  */
-void CWallet::DeleteTransactions(std::vector<uint256> &removeTxs)
+bool CWallet::DeleteTransactions(std::vector<uint256> &removeTxs, bool fRescan)
 {
-    LOCK(cs_wallet);
+    AssertLockHeld(cs_wallet);
+
+    bool removingTransactions = false;
+    if (removeTxs.size() > 0) {
+        removingTransactions = true;
+    }
 
     CWalletDB walletdb(strWalletFile, "r+", false);
 
-    for (int i = 0; i< removeTxs.size(); i++) {
+    for (int i = 0; i < removeTxs.size(); i++) {
         bool fRemoveFromSpends = !(mapWallet.at(removeTxs[i]).IsCoinBase());
         if (EraseFromWallet(removeTxs[i])) {
             if (fRemoveFromSpends) {
@@ -1875,8 +1888,8 @@ void CWallet::DeleteTransactions(std::vector<uint256> &removeTxs)
             }
             LogPrint(BCLog::DELETETX,"DeleteTx - Deleting tx %s, %i.\n", removeTxs[i].ToString(),i);
         } else {
-            LogPrint(BCLog::DELETETX,"DeleteTx - Deleting tx %failed.\n", removeTxs[i].ToString());
-            return;
+            LogPrint(BCLog::DELETETX,"DeleteTx - Deleting tx %s failed.\n", removeTxs[i].ToString());
+            return false;
         }
     }
 
@@ -1884,18 +1897,21 @@ void CWallet::DeleteTransactions(std::vector<uint256> &removeTxs)
     #ifdef __linux__
     malloc_trim(0);
     #endif
+
+    return removingTransactions;
 }
 
-void CWallet::DeleteWalletTransactions(const CBlockIndex* pindex)
+bool CWallet::DeleteWalletTransactions(const CBlockIndex* pindex, bool fRescan)
 {
-    LOCK2(cs_main, cs_wallet);
+    AssertLockHeld(cs_main);
+    AssertLockHeld(cs_wallet);
 
     int nDeleteAfter = (int)fDeleteTransactionsAfterNBlocks;
     bool runCompact = false;
+    bool deletedTransactions = false;
     auto startTime = GetTime();
 
     if (pindex && fTxDeleteEnabled) {
-
         //Check for acentries - exit function if found
         {
             std::list<CAccountingEntry> acentries;
@@ -1903,7 +1919,7 @@ void CWallet::DeleteWalletTransactions(const CBlockIndex* pindex)
             walletdb.ListAccountCreditDebit("*", acentries);
             if (acentries.size() > 0) {
                 LogPrintf("deletetx not compatible to account entries\n");
-                return;
+                return false;
             }
         }
         //delete transactions
@@ -2015,7 +2031,7 @@ void CWallet::DeleteWalletTransactions(const CBlockIndex* pindex)
         LogPrint(BCLog::DELETETX,"DeleteTx - Time to Select %s\n", DateTimeStrFormat("%H:%M:%S", selectTime - reorderTime));
 
         //Delete Transactions from wallet
-        DeleteTransactions(removeTxs);
+        deletedTransactions = DeleteTransactions(removeTxs, fRescan);
 
         auto deleteTime = GetTime();
         LogPrint(BCLog::DELETETX,"DeleteTx - Time to Delete %s\n", DateTimeStrFormat("%H:%M:%S", deleteTime - selectTime));
@@ -2028,6 +2044,8 @@ void CWallet::DeleteWalletTransactions(const CBlockIndex* pindex)
         auto totalTime = GetTime();
         LogPrint(BCLog::DELETETX,"DeleteTx - Time to Run Total Function %s\n", DateTimeStrFormat("%H:%M:%S", totalTime - startTime));
     }
+
+    return deletedTransactions;
 }
 
 /**
@@ -2070,6 +2088,11 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, b
                 if (AddToWalletIfInvolvingMe(tx, &block, fUpdate))
                     ret++;
             }
+
+            //Delete Transactions
+            if (pindex->nHeight % fDeleteInterval == 0)
+                while(DeleteWalletTransactions(pindex, true)) {}
+
             pindex = chainActive.Next(pindex);
             if (GetTime() >= nNow + 60) {
                 nNow = GetTime();
@@ -2081,6 +2104,8 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, b
             }
         }
         ShowProgress(_("Rescanning... Please do not interrupt this process as it could lead to a corrupt wallet."), 100); // hide progress dialog in GUI
+        //Delete transactions
+        while(DeleteWalletTransactions(chainActive.Tip(), true)) {}
     }
     return ret;
 }
