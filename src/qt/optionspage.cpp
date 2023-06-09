@@ -448,18 +448,18 @@ void OptionsPage::on_EnableStaking(ToggleButton* widget)
         const CAmount minStakingAmount = model->getMinStakingAmount();
         StakingStatusError stt = pwalletMain->StakingCoinStatus(minFee, maxFee);
         if (stt == StakingStatusError::UNSTAKABLE_BALANCE_TOO_LOW ||
-            stt == UNSTAKABLE_BALANCE_RESERVE_TOO_HIGH ||
-            stt == UNSTAKABLE_BALANCE_RESERVE_TOO_HIGH_CONSOLIDATION_FAILED ||
-            stt == UNSTAKABLE_BALANCE_TOO_LOW_CONSOLIDATION_FAILED) {
+            stt == StakingStatusError::UNSTAKABLE_BALANCE_RESERVE_TOO_HIGH ||
+            stt == StakingStatusError::UNSTAKABLE_BALANCE_RESERVE_TOO_HIGH_CONSOLIDATION_FAILED ||
+            stt == StakingStatusError::UNSTAKABLE_BALANCE_TOO_LOW_CONSOLIDATION_FAILED) {
 
             if (stt == StakingStatusError::UNSTAKABLE_BALANCE_TOO_LOW) {
                 errorMessage = tr("Your stakeable balance is under the threshold of %1 PRCY. Please deposit more PRCY into your account in order to enable staking.").arg(minStakingAmount);
-            } else if (stt == UNSTAKABLE_BALANCE_TOO_LOW_CONSOLIDATION_FAILED) {
+            } else if (stt == StakingStatusError::UNSTAKABLE_BALANCE_TOO_LOW_CONSOLIDATION_FAILED) {
                 errorMessage = tr("Your balance requires a consolidation transaction which incurs a fee of between %1 to %2 PRCY. However after that transaction fee, your balance will be below the staking threshold of %3 PRCY. Please deposit more PRCY into your account or reduce your reserved amount in order to enable staking.")
                           .arg(QString::fromStdString(FormatMoney(minFee)))
                           .arg(QString::fromStdString(FormatMoney(maxFee)))
                           .arg(minStakingAmount);
-            } else if (stt == UNSTAKABLE_BALANCE_RESERVE_TOO_HIGH) {
+            } else if (stt == StakingStatusError::UNSTAKABLE_BALANCE_RESERVE_TOO_HIGH) {
                 errorMessage = tr("Your stakeable balance is under the threshold of %1 PRCY. This is due to your reserve balance being too high. Please deposit more PRCY into your account or reduce your reserved amount in order to enable staking.").arg(minStakingAmount);
             } else {
                 SetRingSize(0);
