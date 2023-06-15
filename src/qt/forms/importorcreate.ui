@@ -19,40 +19,35 @@
   <property name="windowTitle">
    <string>PRivaCY Coin Wallet Wizard</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <property name="topMargin">
     <number>30</number>
    </property>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="text">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
       <string>Do you want to create a new wallet or recover from your mnemonics?</string>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QRadioButton" name="rbCreate">
+        <property name="text">
+         <string>Create a new wallet</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rbRecover">
+        <property name="text">
+         <string>Recover from a mnemonic phrase</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
-   </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QRadioButton" name="rbCreate">
-       <property name="text">
-        <string>Create a new wallet</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="rbRecover">
-       <property name="text">
-        <string>Recover from a mnemonic phrase</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">

@@ -21,35 +21,37 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
-     <property name="autoFillBackground">
-      <bool>false</bool>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Enter your mnemonic recovery phrase to recover your wallet</string>
      </property>
-     <property name="text">
-      <string>Enter your mnemonics recovery phrase to recover your wallet</string>
-     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QTextEdit" name="mnemonics"/>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QCheckBox" name="useRecoveryHeight">
+          <property name="toolTip">
+           <string>Specify a block height to start scanning for transactions during recovery. Use if you know the height of your wallet's first transaction. Incorrect usage may miss transactions, affecting wallet balance.</string>
+          </property>
+          <property name="text">
+           <string>Use Recovery Height (ADVANCED)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="recoveryHeight">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
-   </item>
-   <item>
-    <widget class="QTextEdit" name="mnemonics"/>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QCheckBox" name="useRecoveryHeight">
-       <property name="text">
-        <string>Use Recovery Height (ADVANCED)</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="recoveryHeight">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
