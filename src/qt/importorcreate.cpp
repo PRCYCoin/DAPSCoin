@@ -48,8 +48,8 @@ void ImportOrCreate::on_next()
         msgBox.exec();
 
         if (msgBox.clickedButton() == copyButton) {
-        //Copy Mnemonic Recovery Phrase to clipboard
-            GUIUtil::setClipboard(std::string(mnemonic.begin(), mnemonic.end()).c_str());
+            //Copy Mnemonic Recovery Phrase to clipboard
+            GUIUtil::setClipboard(mPhrase);
         }
 
     } else {

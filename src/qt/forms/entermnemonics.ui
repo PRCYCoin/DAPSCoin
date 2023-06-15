@@ -19,10 +19,7 @@
   <property name="windowTitle">
    <string>PRivaCY Coin Wallet Recovery Wizard</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
-   <property name="topMargin">
-    <number>30</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
      <property name="autoFillBackground">
@@ -34,9 +31,23 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <widget class="QTextEdit" name="mnemonics"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QTextEdit" name="mnemonics"/>
+      <widget class="QCheckBox" name="useRecoveryHeight">
+       <property name="text">
+        <string>Use Recovery Height (ADVANCED)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="recoveryHeight">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

@@ -19,6 +19,7 @@ public:
     ~EnterMnemonics();
 private Q_SLOTS:
     void on_next();
+    void on_useRecoveryHeight_clicked(bool checked);
 
 private:
     Ui::EnterMnemonics *ui;
