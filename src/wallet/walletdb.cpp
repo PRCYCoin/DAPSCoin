@@ -146,6 +146,17 @@ bool CWalletDB::EraseWatchOnly(const CScript& dest)
     return Erase(std::make_pair(std::string("watchs"), *(const CScriptBase*)(&dest)));
 }
 
+bool CWalletDB::WriteWalletBirthday(const int& nHeight)
+{
+    nWalletDBUpdateCounter++;
+    return Write(std::string("walletbirthday"), nHeight);
+}
+
+bool CWalletDB::ReadWalletBirthday(int& nHeight)
+{
+    return Read(std::string("walletbirthday"), nHeight);
+}
+
 bool CWalletDB::WriteMultiSig(const CScript& dest)
 {
     nWalletDBUpdateCounter++;

@@ -1661,6 +1661,13 @@ bool AppInit2(bool isDaemon)
             }
 
             pwalletMain->SetBestChain(chainActive.GetLocator());
+
+            //Write Wallet birthday
+            {
+                pwalletMain->nBirthday = 0;
+                CWalletDB walletdb(strWalletFile);
+                walletdb.WriteWalletBirthday(pwalletMain->nBirthday);
+            }
         }
 
         LogPrintf("%s", strErrors.str());
@@ -1682,8 +1689,15 @@ bool AppInit2(bool isDaemon)
             }
         }
 
+        //Load Wallet birthday
+        {
+            CWalletDB walletdb(strWalletFile);
+            walletdb.ReadWalletBirthday(pwalletMain->nBirthday);
+        }
+
         if (GetBoolArg("-rescan", false)) {
             pindexRescan = chainActive.Genesis();
+            pwalletMain->nBirthday = 0;
         } else {
             CWalletDB walletdb(strWalletFile);
             CBlockLocator locator;

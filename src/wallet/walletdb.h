@@ -129,6 +129,10 @@ public:
     bool WriteWatchOnly(const CScript& script);
     bool EraseWatchOnly(const CScript& script);
 
+    //Height of first known transaction
+    bool WriteWalletBirthday(const int& nHeight);
+    bool ReadWalletBirthday(int& nHeight);
+
     bool WriteMultiSig(const CScript& script);
     bool EraseMultiSig(const CScript& script);
 

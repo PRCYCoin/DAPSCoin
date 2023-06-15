@@ -751,6 +751,12 @@ bool CWallet::SetMaxVersion(int nVersion)
     return true;
 }
 
+void CWallet::SetWalletBirthday(int nHeight)
+{
+    CWalletDB walletdb(strWalletFile);
+    walletdb.WriteWalletBirthday(nHeight);
+}
+
 std::set<uint256> CWallet::GetConflicts(const uint256& txid) const
 {
     std::set<uint256> result;
@@ -1287,10 +1293,12 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pbl
         bool fExisted = mapWallet.count(tx.GetHash()) != 0;
         if (fExisted && !fUpdate) return false;
         IsTransactionForMe(tx);
+        int nHeight;
         if (pblock && mapBlockIndex.count(pblock->GetHash()) == 1) {
+            nHeight = mapBlockIndex[pblock->GetHash()]->nHeight;
             if (!IsLocked()) {
                 try {
-                    CWalletDB(strWalletFile).WriteScannedBlockHeight(mapBlockIndex[pblock->GetHash()]->nHeight);
+                    CWalletDB(strWalletFile).WriteScannedBlockHeight(nHeight);
                 } catch (const std::exception& e) {
                     LogPrintf("Cannot open data base or wallet is locked\n");
                 }
@@ -1301,6 +1309,13 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pbl
             // Get merkle branch if transaction was found in a block
             if (pblock)
                 wtx.SetMerkleBranch(*pblock);
+
+            //Set Wallet Birthday on first transaction found
+            if (nBirthday > 0 && nHeight < nBirthday) {
+                nBirthday = nHeight;
+                SetWalletBirthday(nBirthday);
+            }
+            
             // Do not flush the wallet here for performance reasons
             // this is safe, as in case of a crash, we rescan the necessary blocks on startup through our SetBestChain-mechanism
             CWalletDB walletdb(strWalletFile, "r+", false);
@@ -2078,7 +2093,7 @@ int CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate, b
         } else if (height == -1) {
             // no need to read and scan block, if block was created before
             // our wallet birthday (as adjusted for block time variability)
-            while (pindex && nTimeFirstKey && (pindex->GetBlockTime() < (nTimeFirstKey - 7200))) {
+            while (pindex && nTimeFirstKey && (pindex->GetBlockTime() < (nTimeFirstKey - 7200)) && (pindex->nHeight < pwalletMain->nBirthday)) {
                 pindex = chainActive.Next(pindex);
             }
         }
