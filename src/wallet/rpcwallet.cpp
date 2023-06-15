@@ -2098,8 +2098,8 @@ UniValue getwalletinfo(const UniValue& params, bool fHelp)
             "{\n"
             "  \"walletversion\": xxxxx,      (numeric) the wallet version\n"
             "  \"balance\": xxxxxxx,          (numeric) the total PRCY balance of the wallet\n"
-            "  \"unconfirmed_balance\": xxx, (numeric) the total unconfirmed balance of the wallet in PRCY\n"
-            "  \"immature_balance\": xxxxxx, (numeric) the total immature balance of the wallet in PRCY\n"
+            "  \"unconfirmed_balance\": xxx,  (numeric) the total unconfirmed balance of the wallet in PRCY\n"
+            "  \"immature_balance\": xxxxxx,  (numeric) the total immature balance of the wallet in PRCY\n"
             "  \"txcount\": xxxxxxx,          (numeric) the total number of transactions in the wallet\n"
             "  \"keypoololdest\": xxxxxx,     (numeric) the timestamp (seconds since GMT epoch) of the oldest pre-generated key in the key pool\n"
             "  \"keypoolsize\": xxxx,         (numeric) how many new keys are pre-generated\n"
@@ -2124,6 +2124,27 @@ UniValue getwalletinfo(const UniValue& params, bool fHelp)
         obj.push_back(Pair("walletunlocked", !pwalletMain->IsLocked()));
         obj.push_back(Pair("unlocked_until", nWalletUnlockTime));
     obj.push_back(Pair("paytxfee", ValueFromAmount(payTxFee.GetFeePerK())));
+    obj.push_back(Pair("walletbirthday", pwalletMain->nBirthday));
+    return obj;
+}
+
+UniValue getwalletbirthday(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "getwalletbirthday\n"
+            "Returns the wallet's birthday blockheight.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"blockheight\": xxxxxxx,          (numeric) the birthday blockheight of the wallet\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getwalletbirthday", "") + HelpExampleRpc("getwalletbirthday", ""));
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("walletbirthday", pwalletMain->nBirthday));
     return obj;
 }
 
@@ -3160,4 +3181,3 @@ UniValue erasefromwallet(const UniValue& params, bool fHelp)
 
     return "Done";
 }
-
