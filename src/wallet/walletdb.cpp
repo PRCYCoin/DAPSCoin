@@ -1268,6 +1268,12 @@ bool CWalletDB::WriteDestData(const std::string& address, const std::string& key
     return Write(std::make_pair(std::string("destdata"), std::make_pair(address, key)), value);
 }
 
+bool CWalletDB::EraseDestData(const std::string& address, const std::string& key)
+{
+    nWalletDBUpdateCounter++;
+    return Erase(std::make_pair(std::string("destdata"), std::make_pair(address, key)));
+}
+
 bool CWalletDB::WriteTxPrivateKey(const std::string& outpointKey, const std::string& k)
 {
     return Write(std::make_pair(std::string("txpriv"), outpointKey), k);
@@ -1278,20 +1284,26 @@ bool CWalletDB::ReadTxPrivateKey(const std::string& outpointKey, std::string& k)
     return Read(std::make_pair(std::string("txpriv"), outpointKey), k);
 }
 
+bool CWalletDB::EraseTxPrivateKey(const std::string& outpointKey, std::string& k)
+{
+    nWalletDBUpdateCounter++;
+    return Erase(std::make_pair(std::string("txpriv"), outpointKey));
+}
+
 bool CWalletDB::WriteKeyImage(const std::string& outpointKey, const CKeyImage& k)
 {
     return Write(std::make_pair(std::string("outpointkeyimage"), outpointKey), k);
 }
+
 bool CWalletDB::ReadKeyImage(const std::string& outpointKey, CKeyImage& k)
 {
     return Read(std::make_pair(std::string("outpointkeyimage"), outpointKey), k);
 }
 
-
-bool CWalletDB::EraseDestData(const std::string& address, const std::string& key)
+bool CWalletDB::EraseKeyImage(const std::string& outpointKey, CKeyImage& k)
 {
     nWalletDBUpdateCounter++;
-    return Erase(std::make_pair(std::string("destdata"), std::make_pair(address, key)));
+    return Erase(std::make_pair(std::string("outpointkeyimage"), outpointKey));
 }
 
 bool CWalletDB::WriteHDChain(const CHDChain& chain)
