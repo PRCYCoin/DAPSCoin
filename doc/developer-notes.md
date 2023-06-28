@@ -680,9 +680,6 @@ Current subtrees include:
 - src/secp256k1
   - Upstream at https://github.com/bitcoin-core/secp256k1/ ; actively maintained by Core contributors.
 
-- src/univalue
-  - Upstream at https://github.com/bitcoin-core/univalue ; actively maintained by Core contributors, deviates from upstream https://github.com/jgarzik/univalue
-
 Upgrading LevelDB
 ---------------------
 

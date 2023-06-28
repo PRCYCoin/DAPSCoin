@@ -59,7 +59,6 @@ contrib/devtools/split-debug.sh
 
 src/qt/prcycoin-qt-multisig
 src/qt/test/test_prcycoin-qt-multisig
-src/univalue/gen
 
 src/qt/*.moc
 src/qt/moc_*.cpp
