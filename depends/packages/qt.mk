@@ -13,7 +13,7 @@ $(package)_patches += fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch
 $(package)_patches += support_new_android_ndks.patch fix_android_jni_static.patch dont_hardcode_pwd.patch
 $(package)_patches += dont_hardcode_x86_64.patch
 $(package)_patches+= fix_lib_paths.patch fix_android_pch.patch
-$(package)_patches+= fix_limits_header.patch
+$(package)_patches+= qtbase-moc-ignore-gcc-macro.patch fix_limits_header.patch
 $(package)_patches+= fix_montery_include.patch
 
 # Update OSX_QT_TRANSLATIONS when this is updated
@@ -227,6 +227,7 @@ define $(package)_preprocess_cmds
 	patch -p1 -i $($(package)_patch_dir)/no-xlib.patch && \
   patch -p1 -i $($(package)_patch_dir)/dont_hardcode_x86_64.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_lib_paths.patch && \
+  patch -p1 -i $($(package)_patch_dir)/qtbase-moc-ignore-gcc-macro.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_limits_header.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_montery_include.patch && \
   mkdir -p qtbase/mkspecs/macx-clang-linux &&\
