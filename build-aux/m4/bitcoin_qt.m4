@@ -67,9 +67,10 @@ AC_DEFUN([BITCOIN_QT_INIT],[
   AS_IF([test "x$with_gui" = xqt5_debug],
         [AS_CASE([$host],
                  [*darwin*], [qt_lib_suffix=_debug],
-                 [*mingw*], [qt_lib_suffix=d],
                  [qt_lib_suffix= ]); bitcoin_qt_want_version=qt5],
         [qt_lib_suffix= ])
+
+  AS_CASE([$host], [*android*], [qt_lib_suffix=_$ANDROID_ARCH])
 
   AC_ARG_WITH([qt-incdir],[AS_HELP_STRING([--with-qt-incdir=INC_DIR],[specify qt include path (overridden by pkgconfig)])], [qt_include_path=$withval], [])
   AC_ARG_WITH([qt-libdir],[AS_HELP_STRING([--with-qt-libdir=LIB_DIR],[specify qt lib path (overridden by pkgconfig)])], [qt_lib_path=$withval], [])
@@ -144,8 +145,6 @@ AC_DEFUN([BITCOIN_QT_CONFIGURE],[
       _BITCOIN_QT_CHECK_STATIC_PLUGIN([QWindowsIntegrationPlugin], [-lqwindows])
       AC_DEFINE(QT_QPA_PLATFORM_WINDOWS, 1, [Define this symbol if the qt platform is windows])
     elif test "x$TARGET_OS" = xlinux; then
-      dnl workaround for https://bugreports.qt.io/browse/QTBUG-74874
-      AX_CHECK_LINK_FLAG([-lxcb-shm], [QT_LIBS="-lxcb-shm $QT_LIBS"], [AC_MSG_ERROR([could not link against -lxcb-shm])])sssssss
       _BITCOIN_QT_CHECK_STATIC_PLUGIN([QXcbIntegrationPlugin], [-lqxcb -lxcb-static])
       AC_DEFINE(QT_QPA_PLATFORM_XCB, 1, [Define this symbol if the qt platform is xcb])
     elif test "x$TARGET_OS" = xdarwin; then
@@ -157,7 +156,7 @@ AC_DEFUN([BITCOIN_QT_CONFIGURE],[
       _BITCOIN_QT_CHECK_STATIC_PLUGIN([QMacStylePlugin], [-lqmacstyle])
       AC_DEFINE(QT_QPA_PLATFORM_COCOA, 1, [Define this symbol if the qt platform is cocoa])
     elif test "x$TARGET_OS" = xandroid; then
-      QT_LIBS="-Wl,--export-dynamic,--undefined=JNI_OnLoad -lqtforandroid -ljnigraphics -landroid -lqtfreetype -lQt5EglSupport $QT_LIBS"
+      QT_LIBS="-Wl,--export-dynamic,--undefined=JNI_OnLoad -lplugins_platforms_qtforandroid_$ANDROID_ARCH -ljnigraphics -landroid -lqtfreetype_$ANDROID_ARCH $QT_LIBS"
       AC_DEFINE(QT_QPA_PLATFORM_ANDROID, 1, [Define this symbol if the qt platform is android])
     fi
   fi
@@ -343,11 +342,15 @@ AC_DEFUN([_BITCOIN_QT_CHECK_STATIC_LIBS], [
   PKG_CHECK_MODULES([QTFB], [Qt5FbSupport${qt_lib_suffix}], [QT_LIBS="-lQt5FbSupport${qt_lib_suffix} $QT_LIBS"])
   if test "x$TARGET_OS" = xlinux; then
     PKG_CHECK_MODULES([QTXCBQPA], [Qt5XcbQpa], [QT_LIBS="$QTXCBQPA_LIBS $QT_LIBS"])
+    PKG_CHECK_MODULES([QT_XKBCOMMON], [${qt_lib_prefix}XkbCommonSupport], [QT_LIBS="$QT_XKBCOMMON_LIBS $QT_LIBS"])
   elif test "x$TARGET_OS" = xdarwin; then
     PKG_CHECK_MODULES([QTCLIPBOARD], [Qt5ClipboardSupport${qt_lib_suffix}], [QT_LIBS="-lQt5ClipboardSupport${qt_lib_suffix} $QT_LIBS"])
     PKG_CHECK_MODULES([QTGRAPHICS], [Qt5GraphicsSupport${qt_lib_suffix}], [QT_LIBS="-lQt5GraphicsSupport${qt_lib_suffix} $QT_LIBS"])
   elif test "x$TARGET_OS" = xwindows; then
     PKG_CHECK_MODULES([QTWINDOWSUIAUTOMATION], [Qt5WindowsUIAutomationSupport${qt_lib_suffix}], [QT_LIBS="-lQt5WindowsUIAutomationSupport${qt_lib_suffix} $QT_LIBS"])
+  elif test "x$TARGET_OS" = xandroid; then
+    PKG_CHECK_MODULES([QT_EGL], [${qt_lib_prefix}EglSupport${qt_lib_suffix}], [QT_LIBS="$QT_EGL_LIBS $QT_LIBS"])
+    PKG_CHECK_MODULES([QT_SERVICE], [${qt_lib_prefix}ServiceSupport${qt_lib_suffix}], [QT_LIBS="$QT_SERVICE_LIBS $QT_LIBS"])
   fi
 ])
 
