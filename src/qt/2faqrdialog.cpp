@@ -70,13 +70,12 @@ void TwoFAQRDialog::update()
     }
 
     pwalletMain->Write2FASecret(addr);
+
     QSettings settings;
     int digits = settings.value("2fadigits").toInt();
-    if (digits == 8) {
-        uri.sprintf("otpauth://totp/PRCY:QT Wallet?secret=%s&issuer=prcycoin&algorithm=SHA1&digits=8&period=30", addr.c_str());
-    } else if (digits == 6) {
-        uri.sprintf("otpauth://totp/PRCY:QT Wallet?secret=%s&issuer=prcycoin&algorithm=SHA1&digits=6&period=30", addr.c_str());
-    }
+    uri = QString("otpauth://totp/PRCY:QT Wallet?secret=%1&issuer=prcycoin&algorithm=SHA1&digits=%2&period=30")
+        .arg(QString::fromStdString(addr))
+        .arg(digits);
 
     infoText = "Recovery Key: ";
     ui->lblURI->setText(infoText + addr.c_str());

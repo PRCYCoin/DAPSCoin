@@ -18,6 +18,7 @@
 #include <QCursor>
 #include <QItemSelection>
 #include <QMessageBox>
+#include <QScreen>
 #include <QScrollBar>
 #include <QTextDocument>
 #include <QStylePainter>
@@ -98,7 +99,7 @@ void ReceiveCoinsDialog::setModel(WalletModel* model)
 
 void ReceiveCoinsDialog::loadAccount()
 {
-    QRect rec = QApplication::desktop()->availableGeometry();
+    QRect rec = QGuiApplication::primaryScreen()->geometry();
     int screenWidth = rec.width();
     QString addr;
     std::string address;
@@ -123,7 +124,7 @@ void ReceiveCoinsDialog::loadAccount()
 }
 
 /*void ReceiveCoinsDialog::loadAccount() {
-    QRect rec = QApplication::desktop()->availableGeometry();
+    QRect rec = QGuiApplication::primaryScreen()->geometry();
     int screenWidth = rec.width();
     QString addr;
 

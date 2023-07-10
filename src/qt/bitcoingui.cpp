@@ -51,6 +51,7 @@
 #include <QMimeData>
 #include <QMouseEvent>
 #include <QCursor>
+#include <QScreen>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QStyle>
@@ -115,7 +116,7 @@ BitcoinGUI::BitcoinGUI(const NetworkStyle* networkStyle, QWidget* parent) : QMai
     this->setMinimumSize(BASE_WINDOW_WIDTH, BASE_WINDOW_MIN_HEIGHT);
 
     // Adapt screen size
-    QRect rec = QApplication::desktop()->screenGeometry();
+    QRect rec = QGuiApplication::primaryScreen()->geometry();
     int adaptedHeight = (rec.height() < BASE_WINDOW_HEIGHT) ?  BASE_WINDOW_MIN_HEIGHT : BASE_WINDOW_HEIGHT;
     GUIUtil::restoreWindowGeometry(
             "nWindow",

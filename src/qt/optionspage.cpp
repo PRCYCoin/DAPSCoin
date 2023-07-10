@@ -712,22 +712,13 @@ void OptionsPage::enable2FA() {
     ui->btn_month->setEnabled(true);
 
     QString code = QString::fromStdString(pwalletMain->Read2FASecret());
-    if (code != "") {
-        char chrlist[6];
-        memcpy(chrlist, code.toUtf8().data(), 6);
-        QString value;
-        value.sprintf("%c", chrlist[0]);
-        ui->code_1->setText(value);
-        value.sprintf("%c", chrlist[1]);
-        ui->code_2->setText(value);
-        value.sprintf("%c", chrlist[2]);
-        ui->code_3->setText(value);
-        value.sprintf("%c", chrlist[3]);
-        ui->code_4->setText(value);
-        value.sprintf("%c", chrlist[4]);
-        ui->code_5->setText(value);
-        value.sprintf("%c", chrlist[5]);
-        ui->code_6->setText(value);
+    if (!code.isEmpty()) {
+        ui->code_1->setText(QString(code.at(0)));
+        ui->code_2->setText(QString(code.at(1)));
+        ui->code_3->setText(QString(code.at(2)));
+        ui->code_4->setText(QString(code.at(3)));
+        ui->code_5->setText(QString(code.at(4)));
+        ui->code_6->setText(QString(code.at(5)));
     }
 
     int period = pwalletMain->Read2FAPeriod();

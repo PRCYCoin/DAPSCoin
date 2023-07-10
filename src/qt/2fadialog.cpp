@@ -3,7 +3,9 @@
 #include "receiverequestdialog.h"
 #include "qgoogleauth.h"
 #include "init.h"
+
 #include <QDateTime>
+#include <QTextStream>
 
 TwoFADialog::TwoFADialog(QWidget *parent) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -158,10 +160,13 @@ void TwoFADialog::on_acceptCode()
 
     QSettings settings;
     int digits = settings.value("2fadigits").toInt();
+
+    QTextStream stream(&code);
+    stream << QChar(code1) << QChar(code2) << QChar(code3) << QChar(code4);
     if (digits == 8) {
-        code.sprintf("%c%c%c%c%c%c%c%c", code1, code2, code3, code4, code5, code6, code7, code8);
+        stream << QChar(code5) << QChar(code6) << QChar(code7) << QChar(code8);
     } else if (digits == 6) {
-        code.sprintf("%c%c%c%c%c%c", code1, code2, code3, code4, code5, code6);
+        stream << QChar(code5) << QChar(code6);
     }
 
     QString result = "";
