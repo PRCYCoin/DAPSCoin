@@ -359,7 +359,7 @@ class CInv
 {
 public:
     CInv();
-    CInv(int typeIn, const uint256& hashIn);
+    CInv(uint32_t typeIn, const uint256& hashIn);
     CInv(const std::string& strType, const uint256& hashIn);
 
     ADD_SERIALIZE_METHODS;
@@ -380,7 +380,7 @@ public:
 
     // TODO: make private (improves encapsulation)
 public:
-    int type;
+    uint32_t type;
     uint256 hash;
 };
 
