@@ -676,7 +676,7 @@ private:
 
 
 /** A key allocated from the key pool. */
-class CReserveKey
+class CReserveKey final
 {
 protected:
     CWallet* pwallet;

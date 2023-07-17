@@ -138,7 +138,7 @@ bool ShutdownRequested()
     return fRequestShutdown || fRestartRequested;
 }
 
-class CCoinsViewErrorCatcher : public CCoinsViewBacked
+class CCoinsViewErrorCatcher final : public CCoinsViewBacked
 {
 public:
     CCoinsViewErrorCatcher(CCoinsView* view) : CCoinsViewBacked(view) {}
