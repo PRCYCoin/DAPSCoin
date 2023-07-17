@@ -55,7 +55,7 @@ struct CDiskTxPos : public CDiskBlockPos {
 };
 
 /** CCoinsView backed by the LevelDB coin database (chainstate/) */
-class CCoinsViewDB : public CCoinsView
+class CCoinsViewDB final : public CCoinsView
 {
 protected:
     CDBWrapper db;
