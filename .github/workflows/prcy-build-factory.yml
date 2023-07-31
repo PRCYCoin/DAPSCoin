@@ -17,18 +17,36 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Create Version Variable
+    - name: Create Version Variable and Append Commit Hash to Development Builds
+      id: create_version
       run: |
-        export VERSION=$(cat version.txt | sed 's/[^0-9,.]//g')
-        export TAG=v${VERSION}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-        echo "TAG=${TAG}" >> $GITHUB_ENV
-    - name: Append Commit Hash to Development Builds
-      if: "!contains(github.ref, 'master')"
-      shell: bash
-      run: |
-        export VERSION=${{ env.VERSION }}-${GITHUB_SHA::7}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        # Extract the version numbers from configure.ac using sed
+        version_major=$(sed -n 's/define(_CLIENT_VERSION_MAJOR, \([0-9]*\))/\1/p' configure.ac)
+        version_minor=$(sed -n 's/define(_CLIENT_VERSION_MINOR, \([0-9]*\))/\1/p' configure.ac)
+        version_revision=$(sed -n 's/define(_CLIENT_VERSION_REVISION, \([0-9]*\))/\1/p' configure.ac)
+        version_build=$(sed -n 's/define(_CLIENT_VERSION_BUILD, \([0-9]*\))/\1/p' configure.ac)
+        version_rc=$(sed -n 's/define(_CLIENT_VERSION_RC, \([0-9]*\))/\1/p' configure.ac)
+
+        # Concatenate the version components
+        version="${version_major}.${version_minor}.${version_revision}"
+        if [[ $version_build -ne 0 ]]; then
+          version="${version}.${version_build}"
+        fi
+        if [[ $version_rc -ne 0 ]]; then
+          version="${version}rc${version_rc}"
+        fi
+
+        # Set the version as an output
+        echo "VERSION=${version}" >> $GITHUB_ENV
+        echo "TAG=v${version}" >> $GITHUB_ENV
+
+        # Append commit hash to development builds
+        if [[ ! "${{ github.ref }}" =~ "master" ]]; then
+          version=${version}-${GITHUB_SHA::7}
+          echo "VERSION=${version}" >> $GITHUB_ENV
+        fi
+
+        echo "Version: $version"
     - name: Print Variables
       run: |
         echo "VERSION=${VERSION}"
@@ -51,6 +69,9 @@ jobs:
       with:
         name: ${{ env.SOURCE_ARTIFACT }}
         path: ${{ env.ARTIFACT_DIR }}
+    outputs:
+        version: ${{ env.VERSION }}
+        tag: ${{ env.TAG }}
   build-x86_64-linux:
     name: Build for x86 Linux 64bit
     needs: create-source-distribution
@@ -68,17 +89,6 @@ jobs:
         tar -xzf depends.tar.gz
         tar -xzf prcycoin.tar.gz --strip-components=1
       working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Set Env
-      shell: bash
-      run: |
-        export VERSION=$(cat $SOURCE_ARTIFACT/version.txt | sed 's/[^0-9,.]//g')
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-    - name: Append Commit Hash to Development Builds
-      if: "!contains(github.ref, 'master')"
-      shell: bash
-      run: |
-        export VERSION=${{ env.VERSION }}-${GITHUB_SHA::7}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Install Required Packages
       run: |
         sudo apt-get update
@@ -101,7 +111,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
-        name: prcycoin-v${{ env.VERSION }}-x86_64-linux
+        name: prcycoin-v${{ needs.create-source-distribution.outputs.version }}-x86_64-linux
         path: ${{ env.ARTIFACT_DIR }}
   build-win64:
     name: Build for Win64
@@ -119,17 +129,6 @@ jobs:
         tar -xzf depends.tar.gz
         tar -xzf prcycoin.tar.gz --strip-components=1
       working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Set Env
-      shell: bash
-      run: |
-        export VERSION=$(cat $SOURCE_ARTIFACT/version.txt | sed 's/[^0-9,.]//g')
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-    - name: Append Commit Hash to Development Builds
-      if: "!contains(github.ref, 'master')"
-      shell: bash
-      run: |
-        export VERSION=${{ env.VERSION }}-${GITHUB_SHA::7}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Install Required Packages
       run: |
         sudo apt-get update
@@ -156,7 +155,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
-        name: prcycoin-v${{ env.VERSION }}-win64
+        name: prcycoin-v${{ needs.create-source-distribution.outputs.version }}-win64
         path: ${{ env.ARTIFACT_DIR }}
   build-osx64:
     name: Build for MacOSX
@@ -178,22 +177,14 @@ jobs:
     - name: Set Env
       shell: bash
       run: |
-        export VERSION=$(cat $SOURCE_ARTIFACT/version.txt | sed 's/[^0-9,.]//g')
         export XCODE_VERSION=12.1
         export XCODE_BUILD_ID=12A7403
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
         echo "XCODE_VERSION=${XCODE_VERSION}" >> $GITHUB_ENV
         echo "XCODE_BUILD_ID=${XCODE_BUILD_ID}" >> $GITHUB_ENV
         export OSX_SDK_BASENAME=Xcode-$XCODE_VERSION-$XCODE_BUILD_ID-extracted-SDK-with-libcxx-headers.tar.gz
         export OSX_SDK_PATH=depends/sdk-sources/$OSX_SDK_BASENAME
         echo "OSX_SDK_BASENAME=${OSX_SDK_BASENAME}" >> $GITHUB_ENV
         echo "OSX_SDK_PATH=${OSX_SDK_PATH}" >> $GITHUB_ENV
-    - name: Append Commit Hash to Development Builds
-      if: "!contains(github.ref, 'master')"
-      shell: bash
-      run: |
-        export VERSION=${{ env.VERSION }}-${GITHUB_SHA::7}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Install Required Packages
       run: |
         sudo apt-get update
@@ -225,7 +216,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
-        name: prcycoin-v${{ env.VERSION }}-macosx
+        name: prcycoin-v${{ needs.create-source-distribution.outputs.version }}-macosx
         path: ${{ env.ARTIFACT_DIR }}
   build-aarch64-linux:
     name: Build for ARM Linux 64bit
@@ -243,17 +234,6 @@ jobs:
         tar -xzf depends.tar.gz
         tar -xzf prcycoin.tar.gz --strip-components=1
       working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Set Env
-      shell: bash
-      run: |
-        export VERSION=$(cat $SOURCE_ARTIFACT/version.txt | sed 's/[^0-9,.]//g')
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-    - name: Append Commit Hash to Development Builds
-      if: "!contains(github.ref, 'master')"
-      shell: bash
-      run: |
-        export VERSION=${{ env.VERSION }}-${GITHUB_SHA::7}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Install Required Packages
       run: |
         sudo apt-get update
@@ -275,7 +255,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
-        name: prcycoin-v${{ env.VERSION }}-aarch64-linux
+        name: prcycoin-v${{ needs.create-source-distribution.outputs.version }}-aarch64-linux
         path: ${{ env.ARTIFACT_DIR }}
   build-arm-linux-gnueabihf:
     name: Build for ARM Linux 32bit
@@ -293,17 +273,6 @@ jobs:
         tar -xzf depends.tar.gz
         tar -xzf prcycoin.tar.gz --strip-components=1
       working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Set Env
-      shell: bash
-      run: |
-        export VERSION=$(cat $SOURCE_ARTIFACT/version.txt | sed 's/[^0-9,.]//g')
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-    - name: Append Commit Hash to Development Builds
-      if: "!contains(github.ref, 'master')"
-      shell: bash
-      run: |
-        export VERSION=${{ env.VERSION }}-${GITHUB_SHA::7}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Install Required Packages
       run: |
         sudo apt-get update
@@ -325,7 +294,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
-        name: prcycoin-v${{ env.VERSION }}-arm32
+        name: prcycoin-v${{ needs.create-source-distribution.outputs.version }}-arm32
         path: ${{ env.ARTIFACT_DIR }}
   build-riscv64-linux-gnu:
     name: Build for RISC-V 64-bit
@@ -343,17 +312,6 @@ jobs:
         tar -xzf depends.tar.gz
         tar -xzf prcycoin.tar.gz --strip-components=1
       working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Set Env
-      shell: bash
-      run: |
-        export VERSION=$(cat $SOURCE_ARTIFACT/version.txt | sed 's/[^0-9,.]//g')
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-    - name: Append Commit Hash to Development Builds
-      if: "!contains(github.ref, 'master')"
-      shell: bash
-      run: |
-        export VERSION=${{ env.VERSION }}-${GITHUB_SHA::7}
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Install Required Packages
       run: |
         sudo apt-get update
@@ -375,5 +333,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
-        name: prcycoin-v${{ env.VERSION }}-riscv64
+        name: prcycoin-v${{ needs.create-source-distribution.outputs.version }}-riscv64
         path: ${{ env.ARTIFACT_DIR }}
