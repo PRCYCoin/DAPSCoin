@@ -5,7 +5,12 @@
 #ifndef PRCYCOIN_CURLJSON_H
 #define PRCYCOIN_CURLJSON_H
 
+#include "fs.h"
+
 #include <curl/curl.h>
+
+#include <archive.h>
+#include <archive_entry.h>
 
 #include <string>
 
@@ -25,6 +30,21 @@ enum JsonDownloadHeaders {
     GITHUB_HEADERS
 };
 
+struct ParamFile {
+    std::string name;
+    std::string URL;
+    std::string hash;
+    bool verified;
+    bool complete = false;
+    fs::path path;
+    FILE *file;
+    int64_t dlnow;
+    int64_t dltotal;
+    int64_t dlretrytotal = 0;
+    CURL *curl;
+    CurlProgress prog;
+};
+
 struct JsonDownload {
     std::string URL = "";
     std::string response = "";
@@ -34,7 +54,19 @@ struct JsonDownload {
     CurlProgress prog;
 };
 
+extern std::map<std::string, ParamFile> mapParams;
+
+extern bool checkParams();
+extern void initalizeMapParamBootstrap();
+extern void initalizeMapParam();
 static size_t writer(char *in, size_t size, size_t nmemb, std::string *out);
+static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream);
+extern bool downloadFiles(std::string title);
 extern void getHttpsJson(std::string url, JsonDownload* reply, int headerType);
+extern bool getBootstrap();
+static bool extract(fs::path filename);
+static int copy_data(struct archive *ar, struct archive *aw);
+
+static int verbose = 0;
 
 #endif

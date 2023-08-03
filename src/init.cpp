@@ -17,6 +17,7 @@
 #include "amount.h"
 #include "checkpoints.h"
 #include "compat/sanity.h"
+#include "curl_json.h"
 #include "fs.h"
 #include "httpserver.h"
 #include "httprpc.h"
@@ -48,7 +49,6 @@
 #include "wallet/db.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
-
 #endif
 
 #include <fstream>
@@ -65,6 +65,7 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/thread.hpp>
 #include <openssl/crypto.h>
+#include <openssl/evp.h>
 
 #if ENABLE_ZMQ
 #include "zmq/zmqnotificationinterface.h"
@@ -379,6 +380,7 @@ std::string HelpMessage(HelpMessageMode mode)
 #ifndef WIN32
     strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), "prcycoind.pid"));
 #endif
+    strUsage += HelpMessageOpt("-bootstrap", _("Download and install bootstrap on startup"));
     strUsage += HelpMessageOpt("-reindex", _("Rebuild block chain index from current blk000??.dat files") + " " + _("on startup"));
     strUsage += HelpMessageOpt("-reindexmoneysupply",strprintf(_("Reindex the %s money supply statistics"), CURRENCY_UNIT) + " " + _("on startup"));
     strUsage += HelpMessageOpt("-resync", _("Delete blockchain folders and resync from scratch") + " " + _("on startup"));
@@ -1385,6 +1387,43 @@ bool AppInit2(bool isDaemon)
     // ********************************************************* Step 7: load block chain
 
     fReindex = GetBoolArg("-reindex", false);
+
+    bool useBootstrap = false;
+    bool newInstall = GetBoolArg("-bootstrapinstall", false);
+    if (!fs::exists(GetDataDir() / "blocks") || !fs::exists(GetDataDir() / "chainstate"))
+        newInstall = true;
+
+    if (newInstall) {
+        bool fBoot = uiInterface.ThreadSafeMessageBox(
+            "\n\n" + _("New install detected.\n\nPress OK to download the blockchain bootstrap."),
+            "", CClientUIInterface::ICON_INFORMATION | CClientUIInterface::MSG_INFORMATION | CClientUIInterface::MODAL | CClientUIInterface::BTN_OK | CClientUIInterface::BTN_CANCEL);
+        if (fBoot) {
+            useBootstrap = true;
+        }
+    }
+
+    if (GetBoolArg("-bootstrap", false) && !useBootstrap) {
+        bool fBoot = uiInterface.ThreadSafeMessageBox(
+            "\n\n" + _("Bootstrap option detected.\n\nPress OK to download the blockchain bootstrap."),
+            "", CClientUIInterface::ICON_INFORMATION | CClientUIInterface::MSG_INFORMATION | CClientUIInterface::MODAL | CClientUIInterface::BTN_OK | CClientUIInterface::BTN_CANCEL);
+        if (fBoot) {
+            useBootstrap = true;
+        }
+    }
+
+    if (useBootstrap) {
+        fReindex = false;
+        fs::remove_all(GetDataDir() / "blocks");
+        fs::remove_all(GetDataDir() / "chainstate");
+        fs::remove_all(GetDataDir() / "database");
+        getBootstrap();
+    }
+
+    if (fRequestShutdown)
+    {
+        LogPrintf("Shutdown requested. Exiting.\n");
+        return false;
+    }
 
     // Create blocks directory if it doesn't already exist
     fs::create_directories(GetDataDir() / "blocks");

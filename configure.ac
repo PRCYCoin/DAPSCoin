@@ -478,6 +478,7 @@ case $host in
      AC_CHECK_LIB([ws2_32],   [WSAStartup],, AC_MSG_ERROR(libws2_32 missing))
      AC_CHECK_LIB([shlwapi],  [PathRemoveFileSpecW],, AC_MSG_ERROR(libshlwapi missing))
      AC_CHECK_LIB([iphlpapi], [GetAdaptersAddresses],, AC_MSG_ERROR(libiphlpapi missing))
+     AC_CHECK_LIB([crypt32],  [main],, AC_MSG_ERROR(libcrypt32 missing))     
 
      # -static is interpreted by libtool, where it has a different meaning.
      # In libtool-speak, it's -all-static.
@@ -1015,6 +1016,16 @@ PKG_CHECK_MODULES([CURL], [libcurl],, [AC_MSG_ERROR([libcurl not found.])])
 AC_CHECK_HEADER([curl/curl.h],, [AC_MSG_ERROR([libcurl header not found.])])
 AC_CHECK_LIB([curl],         [main],CURL_LIBS=-lcurl, AC_MSG_ERROR(libcurl missing))
 
+dnl libarchive check
+PKG_CHECK_MODULES([LIBARCHIVE], [libarchive],, [AC_MSG_ERROR([libarchive not found.])])
+AC_CHECK_HEADER([archive.h],, [AC_MSG_ERROR([libarchive header not found.])])
+AC_CHECK_LIB([archive], [archive_read_free], [LIBARCHIVE_LIBS=-larchive], [AC_MSG_ERROR([libarchive missing])])
+
+dnl zlib check
+PKG_CHECK_MODULES([ZLIB], [zlib],, [AC_MSG_ERROR([zlib not found.])])
+AC_CHECK_HEADER([zlib.h],, [AC_MSG_ERROR([zlib header not found.])])
+AC_CHECK_LIB([z], [gzopen], [ZLIB_LIBS=-lz], [AC_MSG_ERROR([zlib missing])])
+
 save_CXXFLAGS="${CXXFLAGS}"
 CXXFLAGS="${CXXFLAGS} ${CRYPTO_CFLAGS} ${SSL_CFLAGS}"
 AC_CHECK_DECLS([EVP_MD_CTX_new],,,[AC_INCLUDES_DEFAULT
@@ -1288,6 +1299,8 @@ AC_SUBST(CRYPTO_LIBS)
 AC_SUBST(SSL_LIBS)
 AC_SUBST(CURL_CFLAGS)
 AC_SUBST(CURL_LIBS)
+AC_SUBST(LIBARCHIVE_CFLAGS)
+AC_SUBST(LIBARCHIVE_LIBS)
 AC_SUBST(USE_NUM_OPENSSL)
 AC_SUBST(HAVE_FDATASYNC)
 AC_SUBST(HAVE_FULLFSYNC)
