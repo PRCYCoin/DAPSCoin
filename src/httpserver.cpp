@@ -9,6 +9,7 @@
 #include "chainparamsbase.h"
 #include "compat.h"
 #include "util.h"
+#include "utilstrencodings.h"
 #include "netbase.h"
 #include "rpc/protocol.h" // For HTTP status codes
 #include "sync.h"
@@ -251,7 +252,7 @@ static void http_request_cb(struct evhttp_request* req, void* arg)
     }
 
     LogPrint(BCLog::HTTP, "Received a %s request for %s from %s\n",
-             RequestMethodString(hreq->GetRequestMethod()), SanitizeString(hreq->GetURI()).substr(0, 100), hreq->GetPeer().ToString());
+             RequestMethodString(hreq->GetRequestMethod()), SanitizeString(hreq->GetURI(), SAFE_CHARS_URI).substr(0, 100), hreq->GetPeer().ToString());
 
     // Find registered handler for prefix
     std::string strURI = hreq->GetURI();
