@@ -2114,6 +2114,45 @@ UniValue getwalletinfo(const UniValue& params, bool fHelp)
     return obj;
 }
 
+UniValue getwalletbirthday(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw std::runtime_error(
+            "getwalletbirthday\n"
+            "Returns the wallet's birthday blockheight.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"blockheight\": xxxxxxx,          (numeric) the birthday blockheight of the wallet\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getwalletbirthday", "") + HelpExampleRpc("getwalletbirthday", ""));
+
+    LOCK2(cs_main, pwalletMain->cs_wallet);
+
+    const std::map<uint256, CWalletTx>& mapWallet = pwalletMain->mapWallet;
+
+    if (mapWallet.empty()) {
+        throw std::runtime_error("No transactions found in the wallet.");
+    }
+
+    int firstTransactionBlockHeight = std::numeric_limits<int>::max(); // Set to a high value
+
+    for (const auto& kv : mapWallet) {
+        const CWalletTx& tx = kv.second;
+        if (tx.GetBlockHeight() != -1 && tx.GetBlockHeight() < firstTransactionBlockHeight) {
+            firstTransactionBlockHeight = tx.GetBlockHeight();
+        }
+    }
+
+    if (firstTransactionBlockHeight == std::numeric_limits<int>::max()) {
+        throw std::runtime_error("No confirmed transactions found in the wallet.");
+    }
+
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("blockheight", firstTransactionBlockHeight));
+    return obj;
+}
+
 UniValue gettxcount(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
