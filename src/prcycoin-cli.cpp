@@ -140,8 +140,14 @@ static void http_request_done(struct evhttp_request *req, void *ctx)
 
 UniValue CallRPC(const std::string& strMethod, const UniValue& params)
 {
-    std::string host = GetArg("-rpcconnect", "127.0.0.1");
-    int port = GetArg("-rpcport", BaseParams().RPCPort());
+    std::string host;
+    // In preference order, we choose the following for the port:
+    //     1. -rpcport
+    //     2. port in -rpcconnect (ie following : in ipv4 or ]: in ipv6)
+    //     3. default port for chain
+    int port = BaseParams().RPCPort();
+    SplitHostPort(GetArg("-rpcconnect", "127.0.0.1"), port, host);
+    port = GetArg("-rpcport", port);
 
     // Obtain event base
     raii_event_base base = obtain_event_base();
