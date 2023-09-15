@@ -53,7 +53,7 @@ AskPassphraseDialog::AskPassphraseDialog(Mode mode, QWidget* parent, WalletModel
         ui->stakingCheckBox->hide();
     case Mode::UnlockStaking:
     case Mode::Unlock: // Ask passphrase
-        ui->warningLabel->setText(tr("This operation needs your wallet passphrase to unlock the wallet.<br/><br/>(Wallet may appear not responding as it rescans for all transactions)<br/><br/>"));
+        ui->warningLabel->setText(tr("This operation needs your wallet passphrase to unlock the wallet.<br/><br/><b>(Wallet may appear not responding as it rescans for all transactions)</b><br/><br/>"));
         ui->warningLabel->setAlignment(Qt::AlignHCenter);
         ui->passLabel2->hide();
         ui->passEdit2->hide();
