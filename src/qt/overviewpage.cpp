@@ -582,7 +582,7 @@ void OverviewPage::getCurrencyValue()
         ui->labelCurrencyValue->setText("");
         return;
     }
-    getHttpsJson("https://api.prcycoin.com/api/getprice", cgReply, CG_HEADERS);
+    getHttpsJson("https://api.prcycoin.com/api/getprice", cgReply, CG_HEADERS); // can we used the dex API once back available?
 }
 
 void OverviewPage::setCurrencyValue()
