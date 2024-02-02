@@ -7,7 +7,7 @@ $(package)_sha256_hash=3ccd55d91af9516539df80625f818c734dc6f2ecf9bada33c76765e99
 $(package)_config_opts=--disable-shared --enable-static --prefix=$(host_prefix) --host=$(HOST) --with-openssl
 $(package)_config_opts+=--disable-manual --disable-ntlm-wb --with-random=/dev/urandom
 $(package)_config_opts+=--disable-curldebug --disable-libcurl-option --disable-ldap --disable-ldaps
-$(package)_config_opts+=--disable-dependency-tracking --enable-option-checking
+$(package)_config_opts+=--disable-dependency-tracking --enable-option-checking --without-libpsl
 $(package)_config_opts+=CFLAGS="$($(package)_cflags) -fPIC"
 $(package)_conf_tool=./configure
 
