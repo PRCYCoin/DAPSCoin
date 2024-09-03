@@ -65,7 +65,7 @@ jobs:
       TEST_LOG_ARTIFACT_DIR: test-logs
     steps:
     - name: Getting Source
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ${{ env.SOURCE_ARTIFACT }}
     - name: Extract Archives
@@ -110,7 +110,7 @@ jobs:
       ARTIFACT_DIR: prcycoin-win64-debug
     steps:
     - name: Getting Source
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ${{ env.SOURCE_ARTIFACT }}
     - name: Extract Archives
@@ -160,7 +160,7 @@ jobs:
       SDK_URL: https://bitcoincore.org/depends-sources/sdks
     steps:
     - name: Getting Source
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ${{ env.SOURCE_ARTIFACT }}
     - name: Extract Archives
@@ -222,7 +222,7 @@ jobs:
       ARTIFACT_DIR: prcycoin-aarch64-linux-debug
     steps:
     - name: Getting Source
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ${{ env.SOURCE_ARTIFACT }}
     - name: Extract Archives
@@ -266,7 +266,7 @@ jobs:
       ARTIFACT_DIR: prcycoin-arm32-debug
     steps:
     - name: Getting Source
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ${{ env.SOURCE_ARTIFACT }}
     - name: Extract Archives
@@ -310,7 +310,7 @@ jobs:
       ARTIFACT_DIR: prcycoin-riscv64-debug
     steps:
     - name: Getting Source
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ${{ env.SOURCE_ARTIFACT }}
     - name: Extract Archives
